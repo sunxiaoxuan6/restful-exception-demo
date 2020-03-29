@@ -24,15 +24,31 @@ public class MessageController {
         }
     }
     @PostMapping("/message")
-    public ResponseEntity<Message> create(@RequestBody Message message){
-        Message msg=this.messageService.save(message);
-        return ResponseEntity.ok(msg);
+    public ResponseEntity<Message> create(@RequestBody Message message) {
+        if (message == null || message.getText() == null || message.getText().isEmpty()) {
+            throw new CustomException(ExceptionType.USER_INPUT_ERROR);
+        }
+        try {
+            Message msg = this.messageService.save(message);
+            return ResponseEntity.ok(msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CustomException(ExceptionType.SERVER_ERROR.getCode(), e.getMessage());
+        }
     }
 
-    @PutMapping("/message")
+        @PutMapping("/message")
     public ResponseEntity<Message> modify(@RequestBody Message message){
-        Message msg=this.messageService.update(message);
-        return ResponseEntity.ok(msg);
+            if (message == null || message.getText() == null || message.getText().isEmpty()) {
+                throw new CustomException(ExceptionType.USER_INPUT_ERROR);
+            }
+            try {
+                Message msg = this.messageService.update(message);
+                return ResponseEntity.ok(msg);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new CustomException(ExceptionType.SERVER_ERROR.getCode(), e.getMessage());
+            }
     }
     @PatchMapping("/message/text")
     public ResponseEntity<Message> patch(Message message){
@@ -48,9 +64,13 @@ public class MessageController {
         }
     }
     @GetMapping("/message/{id}")
-    public ResponseEntity<Message> get(@PathVariable Long id){
-        Message msg=this.messageService.findOne(id);
-        return ResponseEntity.ok(msg);
+    public ResponseEntity<Message> get(@PathVariable("id") Long id){
+        Message msg = this.messageService.findOne(id);
+        if (msg != null) {
+            return ResponseEntity.ok(msg);
+        } else {
+            return ResponseEntity.noContent().build();
+        }
     }
     @DeleteMapping("/message/{id}")
     public ResponseEntity<String> delete(@PathVariable("id") Long id){
@@ -58,9 +78,14 @@ public class MessageController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/userException")
-    public String userException(){
-        throw new CustomException(ExceptionType.USER_INPUT_ERROR);
+    @GetMapping("/exception")
+    public String exception(){
+        int i = 1 / 0;
+        return "exception";
     }
 
+    @GetMapping("/userException")
+    public String userException() {
+        throw new CustomException(ExceptionType.USER_INPUT_ERROR);
+    }
 }
